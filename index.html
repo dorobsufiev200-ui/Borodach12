@@ -92,11 +92,6 @@
             transition: all 0.3s ease;
         }
 
-        .card:hover {
-            border-color: rgba(243, 156, 18, 0.4);
-            transform: translateY(-2px);
-        }
-
         .card.active {
             border-color: var(--accent);
             background: rgba(243, 156, 18, 0.08);
@@ -373,7 +368,7 @@
 
         window.onload = renderCal;
 
-        function sendBooking(e) {
+        async function sendBooking(e) {
             e.preventDefault();
             booking.name = document.getElementById('clientName').value;
             booking.phone = document.getElementById('clientPhone').value;
@@ -383,97 +378,25 @@
             if (!booking.date) return alert('Выберите дату!');
             if (!booking.time) return alert('Выберите время!');
 
-            // Каждая цифра и буква токена на отдельной строке
-            const t = [
-                '8',
-                '9',
-                '4',
-                '0',
-                '9',
-                '1',
-                '8',
-                '3',
-                '3',
-                '9',
-                ':',
-                'A',
-                'A',
-                'E',
-                'Q',
-                '4',
-                'z',
-                'j',
-                '3',
-                'G',
-                '0',
-                'F',
-                '6',
-                'v',
-                'd',
-                'u',
-                '9',
-                'h',
-                'K',
-                'q',
-                'c',
-                'Z',
-                'b',
-                'A',
-                'S',
-                '_',
-                'M',
-                'C',
-                'A',
-                't',
-                'b',
-                'Y',
-                '9',
-                's',
-                '5',
-                'U'
-            ];
+            try {
+                // Запрос идет на скрытый серверный файл Netlify, токена тут нет!
+                let response = await fetch('/.netlify/functions/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(booking)
+                });
 
-            // Каждая цифра ID чата на отдельной строке
-            const c = [
-                '9',
-                '2',
-                '2',
-                '0',
-                '0',
-                '1',
-                '1',
-                '7',
-                '9'
-            ];
-
-            const TOKEN = t.join('');
-            const CHAT_ID = c.join('');
-
-            const text = `⚡️ НОВАЯ ЗАПИСЬ BORODACH ⚡️\n` +
-                         `👤 Клиент: ${booking.name}\n` +
-                         `📞 Телефон: ${booking.phone}\n` +
-                         `💈 Мастер: ${booking.master}\n` +
-                         `📅 Дата: ${booking.date}\n` +
-                         `⏰ Время: ${booking.time}\n` +
-                         `💵 Услуги: ${booking.service} (${booking.price})\n` +
-                         `📍 Тольятти, ул. Мира, 150`;
-
-            const url = `https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
-
-            fetch(url)
-            .then(res => {
-                if (res.ok) {
+                if (response.ok) {
                     alert('Запись успешно отправлена в бот!');
                     document.getElementById('bookingForm').reset();
                     location.reload();
                 } else {
-                    alert('Ошибка отправки. Проверьте VPN.');
+                    alert('Ошибка отправки с сервера.');
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error(err);
                 alert('Ошибка сети.');
-            });
+            }
         }
     </script>
 </body>
